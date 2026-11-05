@@ -1,0 +1,72 @@
+name: Exportar marcas do NUCOM
+on:
+  push:
+    paths: ['.github/workflows/exportar-marcas.yml']
+permissions:
+  contents: read
+jobs:
+  exportar:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python -m pip install pymupdf==1.26.5 pillow==11.3.0
+      - name: Extrair as imagens da apresentação
+        shell: python
+        run: |
+          from pathlib import Path
+          import fitz
+          from PIL import Image
+          import io
+          import json
+          import base64
+          from zipfile import ZipFile
+          
+          document = fitz.open(next(Path(".").glob("Site Nucom*.pdf")))
+          files = {}
+          def cut(name, page_no, coords, embedded=False):
+              page = document[page_no-1]
+              sx, sy = page.rect.width / 1080, page.rect.height / 1920
+              target = fitz.Rect(coords[0]*sx, coords[1]*sy, coords[2]*sx, coords[3]*sy)
+              pix = None
+              if embedded:
+                  for info in page.get_images(full=True):
+                      for rect in page.get_image_rects(info[0]):
+                          intersection = (target & rect).get_area()
+                          union = target.get_area() + rect.get_area() - intersection
+                          if union and intersection / union > .87:
+                              pix = fitz.Pixmap(document, info[0])
+                              if info[1] and not pix.alpha:
+                                  pix = fitz.Pixmap(pix, fitz.Pixmap(document, info[1]))
+                              break
+                      if pix: break
+              if pix is None:
+                  pix = page.get_pixmap(matrix=fitz.Matrix(2,2), clip=target, alpha=False)
+              im = Image.open(io.BytesIO(pix.tobytes("png")))
+              im.thumbnail((760,760),Image.Resampling.LANCZOS)
+              out = io.BytesIO()
+              im.save(out,format="WEBP",quality=95,method=6)
+              files[name]=out.getvalue()
+              print(name,im.size,len(files[name]))
+          cut("revista",4,(194,550,836,752),True)
+          cut("masterchef",5,(236,312,831,843),True)
+          cut("acontece",8,(132,438,391,701))
+          cut("acontece-especial",8,(595,437,907,722))
+          cut("parceria",8,(95,825,439,1082))
+          cut("parceria-especial",8,(580,849,926,1109))
+          cut("tbt",8,(99,1225,404,1491))
+          for key,data in files.items():
+              dst=Path("assets/marcas") / (key + ".webp")
+              dst.parent.mkdir(parents=True,exist_ok=True)
+              dst.write_bytes(data)
+          for name,data in files.items():
+              encoded=base64.b64encode(data).decode()
+              for pos in range(0,len(encoded),2048):
+                  print("MARCA", name, pos, encoded[pos:pos+2048])
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marcas-do-nucom
+          path: assets/marcas/
+          retention-days: 1
