@@ -1,74 +1,70 @@
-name: Exportar marcas do NUCOM
+name: Conferir NUCOM no navegador
 on:
   push:
     paths: ['.github/workflows/exportar-marcas.yml']
 permissions:
   contents: read
 jobs:
-  exportar:
-    timeout-minutes: 5
+  conferir:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - run: python -m pip install pymupdf==1.26.5 pillow==11.3.0
-      - name: Extrair as imagens da apresentação
+      - run: python -m pip install playwright pillow
+      - run: python -m http.server 8765 --bind 127.0.0.1 >/tmp/nucom-http.log 2>&1 &
+      - name: Conferir desktop, celular e interações
         shell: python
         run: |
+          from playwright.sync_api import sync_playwright
           from pathlib import Path
-          import fitz
+          import base64, io, shutil
           from PIL import Image
-          import io
-          import json
-          import base64
-          from zipfile import ZipFile
-          
-          document = fitz.open(next(Path(".").glob("Site Nucom*.pdf")))
-          files = {}
-          def cut(name, page_no, coords, embedded=False):
-              page = document[page_no-1]
-              sx, sy = page.rect.width / 1080, page.rect.height / 1920
-              target = fitz.Rect(coords[0]*sx, coords[1]*sy, coords[2]*sx, coords[3]*sy)
-              pix = None
-              if embedded:
-                  for info in page.get_images(full=True):
-                      for rect in page.get_image_rects(info[0]):
-                          overlap = target & rect
-
-                          intersection = max(0,overlap.width) * max(0,overlap.height)
-                          union = target.width * target.height + rect.width * rect.height - intersection
-                          if union and intersection / union > .87:
-                              pix = fitz.Pixmap(document, info[0])
-                              if info[1] and not pix.alpha:
-                                  pix = fitz.Pixmap(pix, fitz.Pixmap(document, info[1]))
-                              break
-                      if pix: break
-              if pix is None:
-                  pix = page.get_pixmap(matrix=fitz.Matrix(2,2), clip=target, alpha=False)
-              im = Image.open(io.BytesIO(pix.tobytes("png")))
-              im.thumbnail((760,760),Image.Resampling.LANCZOS)
-              out = io.BytesIO()
-              im.save(out,format="WEBP",quality=95,method=6)
-              files[name]=out.getvalue()
-              print(name,im.size,len(files[name]))
-          cut("revista",4,(194,550,836,752),True)
-          cut("masterchef",5,(236,312,831,843),True)
-          cut("acontece",8,(132,438,391,701))
-          cut("acontece-especial",8,(595,437,907,722))
-          cut("parceria",8,(95,825,439,1082))
-          cut("parceria-especial",8,(580,849,926,1109))
-          cut("tbt",8,(99,1225,404,1491))
-          for key,data in files.items():
-              dst=Path("assets/marcas") / (key + ".webp")
-              dst.parent.mkdir(parents=True,exist_ok=True)
-              dst.write_bytes(data)
-          for name,data in files.items():
-              encoded=base64.b64encode(data).decode()
-              for pos in range(0,len(encoded),2048):
-                  print("MARCA", name, pos, encoded[pos:pos+2048])
-      - uses: actions/upload-artifact@v4
-        with:
-          name: marcas-do-nucom
-          path: assets/marcas/
-          retention-days: 1
+          with sync_playwright() as p:
+              browser = p.chromium.launch(executable_path=shutil.which("google-chrome") or shutil.which("chromium"),args=["--no-sandbox"])
+              page = browser.new_page(viewport={"width":1365,"height":860}, device_scale_factor=1)
+              errors = []
+              page.on("pageerror", lambda e: errors.append(str(e)))
+              page.on("response", lambda res: errors.append(str(res.status)+" "+res.url) if res.status >= 400 else None)
+              page.goto("http://127.0.0.1:8765")
+              page.wait_for_function("document.querySelector('.loader').hidden && document.querySelector('.face img').naturalWidth > 0")
+              page.wait_for_timeout(600)
+              def shot(name):
+                  im=Image.open(io.BytesIO(page.screenshot(type="png")))
+                  im.thumbnail((800,620))
+                  out=io.BytesIO()
+                  im.convert("RGB").save(out,format="JPEG",quality=80)
+                  s=base64.b64encode(out.getvalue()).decode()
+                  for i in range(0,len(s),2048):
+                      print("VISTA",name,i,s[i:i+2048])
+              shot("desktop")
+              assert page.locator("h1").inner_text().replace("\n"," ").strip()
+              page.get_by_role("button",name="Pausar movimento").click()
+              t=page.locator(".rotor").evaluate("(el)=>el.style.transform")
+              page.wait_for_timeout(250)
+              assert t==page.locator(".rotor").evaluate("(el)=>el.style.transform")
+              box=page.locator(".mark").bounding_box()
+              x,y=box["x"]+box["width"]/2,box["y"]+box["height"]/2
+              page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+65,y+10,steps=8);page.mouse.up()
+              assert t!=page.locator(".rotor").evaluate("(el)=>el.style.transform")
+              page.get_by_role("button",name="Ativar movimento").click()
+              page.locator(".mark").click()
+              page.wait_for_function("parseFloat(document.querySelector('.rotor').style.transform.match(/translateY\\(([-.0-9]+)/)[1]) < -4")
+              for el in page.locator(".selector button").all():
+                  el.click()
+                  el.evaluate("(e)=>e.scrollIntoView({behavior:'instant',block:'center'})")
+                  page.wait_for_function("path=>document.querySelector('.viewer img').getAttribute('src').endsWith(path)",arg=el.get_attribute("data-src"))
+              for el in page.locator(".cover img").all():
+                  el.scroll_into_view_if_needed()
+                  assert el.evaluate("im=>im.decode().then(()=>im.naturalWidth>0)")
+              page.set_viewport_size({"width":390,"height":844})
+              page.emulate_media(reduced_motion="reduce")
+              page.goto("http://127.0.0.1:8765")
+              assert page.locator(".loader").is_hidden()
+              assert page.get_by_role("button",name="Ativar movimento").is_visible()
+              assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+              shot("mobile")
+              print("NUCOM QA", "aprovado", "erros", errors)
+              assert not errors, errors
+              browser.close()
