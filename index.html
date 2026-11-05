@@ -165,19 +165,22 @@ new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); 
 sync();
 
 // The original artwork stays intact on both faces of the rotating surface.
-function useLogo(src) {
-  const asset = new Image();
-  asset.onload = () => {
-    for (const face of rotor.children) {
-      const img = asset.cloneNode(); img.alt = ''; img.draggable = false;
-      face.replaceChildren(img);
+async function loadOriginalLogo() {
+  const filenames = ['nucom.png', 'image(20261105-170812).png', 'image(20261105-165111).png'];
+  for (const filename of filenames) {
+    const logo = new Image();
+    logo.alt = '';
+    logo.draggable = false;
+    logo.src = filename;
+    try {
+      await logo.decode();
+    } catch {
+      continue;
     }
-  };
-  asset.src = src;
+    for (const face of rotor.children) face.replaceChildren(logo.cloneNode());
+    return;
+  }
 }
-const original = 'image(20261105-165111).png';
-const candidate = new Image();
-candidate.onload = () => useLogo(original);
-candidate.onerror = () => useLogo('nucom.png');
-candidate.src = original;</script>
+loadOriginalLogo();
+</script>
 </body></html>
