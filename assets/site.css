@@ -26,7 +26,7 @@ nav a::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(0,1fr);align-items:center;gap:1%;min-height:clamp(560px,78svh,900px);padding-block:clamp(40px,6vw,100px)}
 .kicker,.eyebrow{font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;font-weight:720}
 .kicker{display:flex;align-items:center;gap:.7em}.kicker:before{content:"";background:var(--blue);width:20px;height:3px}
-h1{margin:.20em 0 .28em;letter-spacing:-.068em;line-height:.93;font-size:clamp(52px,6.55vw,108px)}
+h1{margin:.20em 0 .28em;letter-spacing:-.026em;line-height:.96;font-size:clamp(52px,6.4vw,108px)}
 .title-line{display:block}.title-line:last-child{color:var(--blue)}.char{display:inline-block;white-space:pre;transform-origin:50% 100%}
 .lead{font-size:clamp(1rem,1.46vw,1.35rem);max-width:37ch;color:#415264}
 .cta{display:inline-flex;align-items:center;justify-content:space-between;gap:2em;margin-top:1.6rem;background:var(--yellow);border-radius:50px;padding:13px 18px 13px 24px;font-weight:680;text-decoration:none;will-change:transform}
