@@ -47,7 +47,7 @@ function tick(now) {
 }
 function sync() {
   cancelAnimationFrame(tickId); previous = 0;
-  motion.textContent = paused ? 'Ativar movimento' : 'Pausar movimento';
+  motion.textContent = paused ? 'Ativar animações' : 'Reduzir animações';
   drawLogo();
   if (started && visible && !paused && !document.hidden) tickId = requestAnimationFrame(tick);
 }
@@ -92,10 +92,9 @@ new IntersectionObserver(([entry]) => {visible=entry.isIntersecting; sync();}).o
 document.addEventListener('visibilitychange',sync);
 
 const loader = $('.loader');
-let introFrame = 0;
 function begin() {
   if (started) return;
-  started = true; cancelAnimationFrame(introFrame); loader.hidden = true;
+  started = true; loader.hidden = true;
   const intro = {duration:760,easing:ease,fill:'backwards'};
   $$('.char').forEach((el,i) => animateElement(el,[
     {opacity:0,filter:'blur(9px)',transform:'perspective(450px) translateY(.65em) rotateX(-55deg)'},
@@ -108,19 +107,23 @@ function begin() {
 function runIntro() {
   if (paused || scrollY > 50 || location.hash) {begin();return;}
   loader.hidden = false;
-  const start = performance.now();
-  function fill(now) {
-    const p = Math.min(1,(now-start)/1100);
-    loader.style.setProperty('--unfilled',(100-p*100)+'%');
-    $('.loader-progress').textContent = Math.round(p*100)+'%';
-    if (p < 1) introFrame=requestAnimationFrame(fill);
-    else {
-      const exit = animateElement(loader,[{clipPath:'inset(0 0 0%)'},{clipPath:'inset(0 0 100%)'}],{duration:350,easing:ease});
-      if (exit) exit.finished.then(begin,begin); else begin();
-    }
+  const paths = $('.signature path',loader);
+  paths.forEach((path,index) => {
+    animateElement(path,[
+      {strokeDasharray:'1',strokeDashoffset:'1',fillOpacity:0},
+      {strokeDasharray:'1',strokeDashoffset:'0',fillOpacity:0,offset:.68},
+      {strokeDasharray:'1',strokeDashoffset:'0',fillOpacity:1}
+    ],{duration:930,delay:index*68,easing:ease,fill:'both'});
+  });
+  const dismiss = () => begin();
+  for (const event of ['wheel','touchstart','keydown']) {
+    addEventListener(event,dismiss,{once:true,passive:true});
   }
-  introFrame = requestAnimationFrame(fill);
-  setTimeout(begin,1900);
+  setTimeout(() => {
+    if (started) return;
+    const exit = animateElement(loader,[{transform:'translateY(0)'},{transform:'translateY(-100%)'}],{duration:360,easing:ease});
+    if (exit) exit.finished.then(begin,begin); else begin();
+  },1250);
 }
 $$('.title-line').forEach(line => {
   const text = line.textContent;
@@ -145,7 +148,22 @@ addEventListener('scroll',() => {
 const reveal = new IntersectionObserver(entries => {
   for (const entry of entries) if (entry.isIntersecting) {
     const el = entry.target;
-    animateElement(el,[{opacity:.12,transform:'translateY(42px) scale(.98)'},{opacity:1,transform:'none'}],
+    if (el.matches('h2')) {
+      const frag = document.createDocumentFragment();
+      const words = el.textContent.trim().split(/\s+/);
+      words.forEach((word,i)=>{
+        const span = document.createElement('span');
+        span.className='blur-word';span.textContent=word;
+        if (i) frag.append(' ');
+        frag.append(span);
+      });
+      el.replaceChildren(frag);
+      $('.blur-word',el).forEach((word,i)=>animateElement(word,[
+        {opacity:0,transform:'translateY(-22px)',filter:'blur(8px)'},
+        {opacity:.65,transform:'translateY(3px)',filter:'blur(3px)',offset:.55},
+        {opacity:1,transform:'none',filter:'blur(0)'}
+      ],{duration:630,delay:60*i,easing:ease,fill:'backwards'}));
+    } else animateElement(el,[{opacity:.12,transform:'translateY(42px) scale(.98)'},{opacity:1,transform:'none'}],
       {duration:760,easing:ease,delay:parseInt(el.dataset.delay || '0',10),fill:'backwards'});
     reveal.unobserve(el);
   }
@@ -165,25 +183,22 @@ if (precise.matches) {
     el.style.setProperty('--spot-x',(event.clientX-r.left)+'px');el.style.setProperty('--spot-y',(event.clientY-r.top)+'px');
   }));
 }
-const buttons = $$('.selector button'), picture = $('.viewer img');
-let request = 0;
-function selectShow(button) {
-  const id = ++request;
-  const next = new Image(); next.src = button.dataset.src; next.alt = button.textContent.trim();
-  next.onload = () => {
-    if(id!==request) return;
-    picture.src=next.src;picture.alt=next.alt;
-    buttons.forEach(el=>el.setAttribute('aria-pressed',String(el===button)));
-    animateElement(picture,[{opacity:.2,transform:'translateY(14px) scale(.95)'},{opacity:1,transform:'none'}],{duration:420,easing:ease});
-  };
+const panels = $('.show-panel');
+function openPanel(active) {
+  panels.forEach((panel,index) => {
+    panel.setAttribute('aria-pressed',String(index===active));
+    panel.style.setProperty('--lean',index===active?'0deg':index<active?'6deg':'-6deg');
+    panel.style.setProperty('--shift',index<active?'6px':'-6px');
+  });
 }
-buttons.forEach((button,i)=>{
-  button.addEventListener('click',()=>selectShow(button));
-  button.addEventListener('keydown',event=>{
-    if (!['ArrowDown','ArrowUp'].includes(event.key)) return;
-    event.preventDefault();
-    const other=buttons[(i+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length];
-    other.focus();selectShow(other);
+panels.forEach((panel,index) => {
+  panel.addEventListener('click',()=>openPanel(index));
+  panel.addEventListener('focus',()=>openPanel(index));
+  panel.addEventListener('pointerenter',e=>{if(precise.matches && e.pointerType==='mouse') openPanel(index);});
+  panel.addEventListener('keydown',e=>{
+    const step = {ArrowLeft:-1,ArrowUp:-1,ArrowRight:1,ArrowDown:1}[e.key];
+    if(!step) return;
+    e.preventDefault();panels[(index+step+panels.length)%panels.length].focus();
   });
 });
 const sections = new IntersectionObserver(entries=>{

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#e9edf1">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="Publicações, encontros e histórias da educação de Rio Claro. Explore a Revista +Diálogos, o MasterChef e os quadros do NUCOM.">
   <title>NUCOM · Núcleo de Comunicação | Educação de Rio Claro</title>
   <link rel="icon" href="imagem_2026-11-05_140823204.png" type="image/png">
@@ -13,15 +13,15 @@
 </head>
 <body id="inicio">
 <a class="skip" href="#principal">Ir para o conteúdo</a>
-<div class="loader" hidden aria-hidden="true"><div class="loader-mark"><img src="imagem_2026-11-05_140823204.png" alt=""><img class="loader-fill" src="imagem_2026-11-05_140823204.png" alt=""></div><span class="loader-progress">0%</span></div>
+<div class="loader" hidden aria-hidden="true"><svg class="signature" viewBox="-10 -15 3591 760" fill="currentColor" aria-hidden="true"><g transform="translate(0,710) scale(1,-1)"><path transform="translate(0,0)" pathLength="1" d="M190 0V323L184 446H194L279 320L526 0H686V670H536V347L543 212H532L440 353L200 670H40V0Z"/><path transform="translate(726,0)" pathLength="1" d="M247 -10C379 -10 440 69 453 153H461V0H601V501H451V247C451 162 416 124 318 124C223 124 189 158 189 239V501H39V189C39 77 106 -10 247 -10Z"/><path transform="translate(1364,0)" pathLength="1" d="M307 -10C468 -10 578 77 578 206V220H429V212C429 148 382 125 304 125C215 125 174 158 174 250C174 343 215 376 304 376C382 376 429 353 429 289V281H578V295C578 425 468 511 307 511C135 511 25 410 25 250C25 92 135 -10 307 -10Z"/><path transform="translate(1967,0)" pathLength="1" d="M307 -10C478 -10 593 92 593 250C593 410 478 511 307 511C136 511 21 410 21 250C21 92 136 -10 307 -10ZM307 123C205 123 170 162 170 250C170 338 205 379 307 379C408 379 444 338 444 250C444 162 408 123 307 123Z"/><path transform="translate(2581,0)" pathLength="1" d="M190 0V253C190 340 216 376 307 376C393 376 422 345 422 262V0H572V253C572 340 598 376 689 376C775 376 804 345 804 262V0H954V312C954 426 891 511 762 511C633 511 582 432 570 347H561C550 440 491 511 375 511C249 511 199 433 187 349H179V501H40V0Z"/></g></svg></div>
 <header><div class="wrap navbar">
-  <a class="word" href="#inicio" aria-label="NUCOM, início"><img src="imagem_2026-11-05_140823204.png" alt="">NUCOM</a>
+  <div class="identity"><a class="word" href="#inicio" aria-label="Nucom, início">Nucom</a><img class="city-logo" src="assets/prefeitura-educacao.webp" width="760" height="254" alt="Prefeitura de Rio Claro · Secretaria da Educação"></div>
   <nav aria-label="Menu principal"><a href="#nucleo">O núcleo</a><a href="#projetos">Projetos</a><a href="#quadros">Quadros</a></nav>
 </div></header>
 <main id="principal">
 <section class="hero" aria-labelledby="titulo">
   <div class="wrap hero-grid">
-    <div class="copy"><p class="kicker">Educação de Rio Claro</p>
+    <div class="copy"><p class="kicker">Secretaria da educação de Rio Claro SP</p>
       <h1 id="titulo" aria-label="Núcleo de Comunicação"><span class="title-line" aria-hidden="true">Núcleo de</span> <span class="title-line" aria-hidden="true">Comunicação</span></h1>
       <p class="lead">As publicações, os encontros e as histórias da rede municipal de ensino.</p>
       <a class="cta" href="#projetos">Explorar projetos <b aria-hidden="true">↘</b></a>
@@ -39,7 +39,6 @@
       </button>
     </div></div>
   </div>
-  <div class="wrap"><div class="rail"><span>Arraste para girar · Toque para saltar</span><button id="motion" hidden type="button">Pausar movimento</button></div></div>
 </section>
 <section class="content" id="nucleo"><div class="wrap split">
   <h2 data-reveal>O núcleo</h2><p class="intro" data-reveal>O NUCOM reúne a comunicação da Secretaria da Educação de Rio Claro. Aqui você encontra os projetos das escolas, os relatos de quem ensina e os registros dos encontros da rede.</p>
@@ -64,14 +63,14 @@
 </div></section>
 <section class="content" id="quadros"><div class="wrap">
   <h2 data-reveal>Quadros semanais</h2>
-  <div class="shows" data-reveal><div class="selector" role="group" aria-label="Escolha um quadro">
-    <button type="button" aria-controls="quadro" aria-pressed="true" data-src="assets/marcas/acontece.webp">Acontece Educação</button>
-    <button type="button" aria-controls="quadro" aria-pressed="false" data-src="assets/marcas/acontece-especial.webp">Acontece Educação Especial</button>
-    <button type="button" aria-controls="quadro" aria-pressed="false" data-src="assets/marcas/parceria.webp">Educação em Parceria</button>
-    <button type="button" aria-controls="quadro" aria-pressed="false" data-src="assets/marcas/parceria-especial.webp">Educação em Parceria Especial</button>
-    <button type="button" aria-controls="quadro" aria-pressed="false" data-src="assets/marcas/tbt.webp">TBT Educação</button>
-  </div><figure class="viewer" id="quadro" aria-live="polite"><img loading="lazy" src="assets/marcas/acontece.webp" alt="Acontece Educação"></figure></div>
+  <div class="show-gallery" role="group" aria-label="Escolha um quadro" data-reveal>
+    <button class="show-panel" type="button" aria-pressed="true" style="--lean:0deg"><img src="assets/marcas/acontece.webp" alt="" loading="lazy"><span>Acontece Educação</span></button>
+    <button class="show-panel" type="button" aria-pressed="false" style="--lean:-6deg"><img src="assets/marcas/acontece-especial.webp" alt="" loading="lazy"><span>Acontece Educação Especial</span></button>
+    <button class="show-panel" type="button" aria-pressed="false" style="--lean:-6deg"><img src="assets/marcas/parceria.webp" alt="" loading="lazy"><span>Educação em Parceria</span></button>
+    <button class="show-panel" type="button" aria-pressed="false" style="--lean:-6deg"><img src="assets/marcas/parceria-especial.webp" alt="" loading="lazy"><span>Educação em Parceria Especial</span></button>
+    <button class="show-panel" type="button" aria-pressed="false" style="--lean:-6deg"><img src="assets/marcas/tbt.webp" alt="" loading="lazy"><span>TBT Educação</span></button>
+  </div>
 </div></section>
 </main>
-<footer><div class="wrap"><strong>NUCOM · Rio Claro</strong><a href="https://www.educacaorc.com.br/">Portal da Educação ↗</a><a href="#inicio">Voltar ao início ↑</a></div></footer>
+<footer><div class="wrap"><div class="identity"><strong class="word">Nucom</strong><img class="city-logo" src="assets/prefeitura-educacao.webp" width="760" height="254" alt="Prefeitura de Rio Claro · Secretaria da Educação"></div><div class="footer-links"><a href="https://www.educacaorc.com.br/">Portal da Educação ↗</a><a href="#inicio">Voltar ao início ↑</a><button id="motion" type="button" hidden>Reduzir animações</button></div></div></footer>
 </body></html>
