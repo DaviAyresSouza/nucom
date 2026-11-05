@@ -1,6 +1,6 @@
 @font-face {
   font-family: Clash;
-  src: url("assets/ClashDisplay-Semibold.otf") format("opentype");
+  src: url("ClashDisplay-Semibold.otf") format("opentype");
   font-weight: 600;
   font-display: swap;
 }

@@ -29,7 +29,9 @@ jobs:
               page.on("response", lambda res: errors.append(str(res.status)+" "+res.url) if res.status >= 400 else None)
               page.goto("http://127.0.0.1:8765")
               page.wait_for_function("document.querySelector('.loader').hidden && document.querySelector('.face img').naturalWidth > 0")
-              page.wait_for_timeout(600)
+              page.evaluate("document.fonts.ready")
+              assert page.evaluate("document.fonts.check(\"600 20px Clash\")")
+              page.wait_for_timeout(1400)
               def shot(name):
                   im=Image.open(io.BytesIO(page.screenshot(type="png")))
                   im.thumbnail((800,620))
