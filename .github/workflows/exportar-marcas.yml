@@ -34,8 +34,10 @@ jobs:
               if embedded:
                   for info in page.get_images(full=True):
                       for rect in page.get_image_rects(info[0]):
-                          intersection = (target & rect).get_area()
-                          union = target.get_area() + rect.get_area() - intersection
+                          overlap = target & rect
+
+                          intersection = max(0,overlap.width) * max(0,overlap.height)
+                          union = target.width * target.height + rect.width * rect.height - intersection
                           if union and intersection / union > .87:
                               pix = fitz.Pixmap(document, info[0])
                               if info[1] and not pix.alpha:
