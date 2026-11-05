@@ -1,7 +1,7 @@
 name: Validar layout do NUCOM
 on:
   push:
-    paths: ['.github/workflows/conferir-layout.yml']
+    paths: ['.github/workflows/conferir-layout.yml', 'assets/movimento.js', 'assets/site.css']
 permissions:
   contents: read
 jobs:
@@ -22,7 +22,7 @@ jobs:
               browser=p.chromium.launch(executable_path=shutil.which("google-chrome"),args=["--no-sandbox"])
               page=browser.new_page()
               errors=[]
-              page.on("pageerror", lambda error: errors.append(str(error)))
+              page.on("pageerror", lambda error: (errors.append(str(error)), print("JS ERROR", error)))
               page.on("response", lambda response: errors.append(response.url) if response.status>=400 else None)
               page.goto("http://127.0.0.1:8765")
               page.wait_for_function("document.querySelector('.loader').hidden")

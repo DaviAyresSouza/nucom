@@ -107,7 +107,8 @@ function begin() {
 function runIntro() {
   if (paused || scrollY > 50 || location.hash) {begin();return;}
   loader.hidden = false;
-  const paths = $('.signature path',loader);
+  setTimeout(begin,1900);
+  const paths = $$('.signature path',loader);
   paths.forEach((path,index) => {
     animateElement(path,[
       {strokeDasharray:'1',strokeDashoffset:'1',fillOpacity:0},
@@ -158,7 +159,7 @@ const reveal = new IntersectionObserver(entries => {
         frag.append(span);
       });
       el.replaceChildren(frag);
-      $('.blur-word',el).forEach((word,i)=>animateElement(word,[
+      $$('.blur-word',el).forEach((word,i)=>animateElement(word,[
         {opacity:0,transform:'translateY(-22px)',filter:'blur(8px)'},
         {opacity:.65,transform:'translateY(3px)',filter:'blur(3px)',offset:.55},
         {opacity:1,transform:'none',filter:'blur(0)'}
@@ -183,7 +184,7 @@ if (precise.matches) {
     el.style.setProperty('--spot-x',(event.clientX-r.left)+'px');el.style.setProperty('--spot-y',(event.clientY-r.top)+'px');
   }));
 }
-const panels = $('.show-panel');
+const panels = $$('.show-panel');
 function openPanel(active) {
   panels.forEach((panel,index) => {
     panel.setAttribute('aria-pressed',String(index===active));
